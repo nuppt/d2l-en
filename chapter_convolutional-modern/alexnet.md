@@ -312,14 +312,41 @@ net.add(nn.Conv2D(96, kernel_size=11, strides=4, activation='relu'),
         nn.Dense(10))
 ```
 
+```{.python .input  n=2}
+net
+```
+
+```{.json .output n=2}
+[
+ {
+  "data": {
+   "text/plain": "Sequential(\n  (0): Conv2D(None -> 96, kernel_size=(11, 11), stride=(4, 4), Activation(relu))\n  (1): MaxPool2D(size=(3, 3), stride=(2, 2), padding=(0, 0), ceil_mode=False)\n  (2): Conv2D(None -> 256, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), Activation(relu))\n  (3): MaxPool2D(size=(3, 3), stride=(2, 2), padding=(0, 0), ceil_mode=False)\n  (4): Conv2D(None -> 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), Activation(relu))\n  (5): Conv2D(None -> 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), Activation(relu))\n  (6): Conv2D(None -> 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), Activation(relu))\n  (7): MaxPool2D(size=(3, 3), stride=(2, 2), padding=(0, 0), ceil_mode=False)\n  (8): Dense(None -> 4096, Activation(relu))\n  (9): Dropout(p = 0.5, axes=())\n  (10): Dense(None -> 4096, Activation(relu))\n  (11): Dropout(p = 0.5, axes=())\n  (12): Dense(None -> 10, linear)\n)"
+  },
+  "execution_count": 2,
+  "metadata": {},
+  "output_type": "execute_result"
+ }
+]
+```
+
 We construct a single-channel data instance with both height and width of 224 to observe the output shape of each layer. It matches our diagram above.
 
-```{.python .input  n=2}
+```{.python .input  n=3}
 X = nd.random.uniform(shape=(1, 1, 224, 224))
 net.initialize()
 for layer in net:
     X = layer(X)
     print(layer.name, 'output shape:\t', X.shape)
+```
+
+```{.json .output n=3}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "conv0 output shape:\t (1, 96, 54, 54)\npool0 output shape:\t (1, 96, 26, 26)\nconv1 output shape:\t (1, 256, 26, 26)\npool1 output shape:\t (1, 256, 12, 12)\nconv2 output shape:\t (1, 384, 12, 12)\nconv3 output shape:\t (1, 384, 12, 12)\nconv4 output shape:\t (1, 256, 12, 12)\npool2 output shape:\t (1, 256, 5, 5)\ndense0 output shape:\t (1, 4096)\ndropout0 output shape:\t (1, 4096)\ndense1 output shape:\t (1, 4096)\ndropout1 output shape:\t (1, 4096)\ndense2 output shape:\t (1, 10)\n"
+ }
+]
 ```
 
 ## Reading Data
@@ -338,7 +365,7 @@ inserting it into the processing pipeline
 before using the `ToTensor` class.
 The `Compose` class concatenates these two changes for easy invocation.
 
-```{.python .input  n=3}
+```{.python .input  n=4}
 # This function has been saved in the d2l package for future use
 def load_data_fashion_mnist(batch_size, resize=None, root=os.path.join(
         '~', '.mxnet', 'datasets', 'fashion-mnist')):
@@ -377,6 +404,16 @@ net.initialize(force_reinit=True, ctx=ctx, init=init.Xavier())
 trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': lr})
 d2l.train_ch5(net, train_iter, test_iter, batch_size, trainer, ctx,
               num_epochs)
+```
+
+```{.json .output n=5}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "training on gpu(0)\nepoch 1, loss 1.3068, train acc 0.508, test acc 0.744, time 74.1 sec\nepoch 2, loss 0.6514, train acc 0.756, test acc 0.794, time 70.3 sec\nepoch 3, loss 0.5318, train acc 0.803, test acc 0.831, time 69.5 sec\nepoch 4, loss 0.4639, train acc 0.828, test acc 0.855, time 70.0 sec\nepoch 5, loss 0.4241, train acc 0.844, test acc 0.869, time 70.0 sec\n"
+ }
+]
 ```
 
 ## Summary
